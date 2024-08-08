@@ -4,6 +4,8 @@
 #include "move.h"
 #include "checkWin.h"
 
+const int moveOrder[WIDTH] = {3,2,4,1,5,0,6};
+
 int count = 0;
 
 int max(int a, int b) {
@@ -34,10 +36,10 @@ int minimax(Bitboard *board, int depth, int isMaximizingPlayer, int alpha, int b
     int bestValue = (isMaximizingPlayer == 1)? INT_MIN : INT_MAX;
     if (isMaximizingPlayer) {
         for (int col = 0; col < WIDTH; col++) {
-            if (openColumn(board, col)) {
-                playMove(board, &board->player1, col);
+            if (openColumn(board, moveOrder[col])) {
+                playMove(board, &board->player1, moveOrder[col]);
                 int alreadyWon = checkWin(&board->player1);
-                undoMove(&board->player1, col);
+                undoMove(&board->player1, moveOrder[col]);
                 alpha = max(alpha, bestValue);
                 if (alreadyWon) {
                     return 100 + depth;
@@ -45,20 +47,20 @@ int minimax(Bitboard *board, int depth, int isMaximizingPlayer, int alpha, int b
             }
         }
         for (int col = 0; col < WIDTH; col++) {
-            if (openColumn(board, col)) {
-                playMove(board, &board->player1, col);
+            if (openColumn(board, moveOrder[col])) {
+                playMove(board, &board->player1, moveOrder[col]);
                 bestValue = max(bestValue, minimax(board, depth - 1, 0, alpha, beta));
-                undoMove(&board->player1, col);
+                undoMove(&board->player1, moveOrder[col]);
                 alpha = max(alpha, bestValue);
                 if (beta <= alpha) break;
             }
         }
     } else {
         for (int col = 0; col < WIDTH; col++) {
-            if (openColumn(board, col)) {
-                playMove(board, &board->player2, col);
+            if (openColumn(board, moveOrder[col])) {
+                playMove(board, &board->player2, moveOrder[col]);
                 int alreadyWon = checkWin(&board->player2);
-                undoMove(&board->player2, col);
+                undoMove(&board->player2, moveOrder[col]);
                 beta = min(beta, bestValue);
                 if (alreadyWon) {
                     return -100 - depth;
@@ -66,10 +68,10 @@ int minimax(Bitboard *board, int depth, int isMaximizingPlayer, int alpha, int b
             }
         }
         for (int col = 0; col < WIDTH; col++) {
-            if (openColumn(board, col)) {
-                playMove(board, &board->player2, col);
+            if (openColumn(board, moveOrder[col])) {
+                playMove(board, &board->player2, moveOrder[col]);
                 bestValue = min(bestValue, minimax(board, depth - 1, 1, alpha, beta));
-                undoMove(&board->player2, col);
+                undoMove(&board->player2, moveOrder[col]);
                 beta = min(beta, bestValue);
                 if (beta <= alpha) break;
             }
@@ -83,15 +85,15 @@ int getBestMove(Bitboard *board, int depth, int isMaximizingPlayer) {
     int bestMove = -1;
     int bestValue = INT_MIN;
     for (int col = 0; col < WIDTH; col++) {
-        if (openColumn(board, col)) {
-            playMove(board, &board->player1, col);
+        if (openColumn(board, moveOrder[col])) {
+            playMove(board, &board->player1, moveOrder[col]);
             int moveValue = minimax(board, depth, !isMaximizingPlayer, INT_MIN, INT_MAX);
             printf("score %d\n", moveValue);
-            undoMove(&board->player1, col);
+            undoMove(&board->player1, moveOrder[col]);
 
             if (moveValue > bestValue) {
                 bestValue = moveValue;
-                bestMove = col;
+                bestMove = moveOrder[col];
             }
         }
     }
@@ -112,7 +114,7 @@ int main (int argc, char *argv[])
 
 
     while (1) {
-        playMove(&game, &game.player1, getBestMove(&game, 14, 1));
+        playMove(&game, &game.player1, getBestMove(&game, 12, 1));
 
         //int player1Win = checkWin(&game->player1);
         //int player2Win = checkWin(&game->player2);
